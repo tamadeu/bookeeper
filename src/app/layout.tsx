@@ -4,6 +4,8 @@ import "./globals.css";
 import { BooksProvider } from "@/context/BooksContext";
 import { getAllBooks } from "@/actions/books";
 import { getSession } from "@/lib/session";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +17,11 @@ const geistSans = Geist({
 export const metadata: Metadata = {
   title: "Bookeeper",
   description: "Sua biblioteca pessoal de livros",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Bookeeper",
+  },
 };
 
 export default async function RootLayout({
@@ -30,7 +37,9 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         <BooksProvider key={session?.userId ?? "guest"} initialBooks={books}>
           {children}
+          <InstallPrompt />
         </BooksProvider>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
