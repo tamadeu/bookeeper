@@ -16,6 +16,7 @@ interface BookFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   editingBook?: Book | null;
+  prefillData?: ISBNBookPreview | null;
 }
 
 const DEFAULT_FORM = {
@@ -35,7 +36,7 @@ const DEFAULT_FORM = {
   finishedAt: "",
 };
 
-export function BookFormModal({ isOpen, onClose, editingBook }: BookFormModalProps) {
+export function BookFormModal({ isOpen, onClose, editingBook, prefillData }: BookFormModalProps) {
   const { addBook, updateBook } = useBooks();
   const [tab, setTab] = useState<ModalTab>("isbn");
   const [form, setForm] = useState(DEFAULT_FORM);
@@ -59,11 +60,26 @@ export function BookFormModal({ isOpen, onClose, editingBook }: BookFormModalPro
         startedAt: editingBook.startedAt ?? "",
         finishedAt: editingBook.finishedAt ?? "",
       });
+    } else if (prefillData) {
+      setTab("manual");
+      setForm({
+        ...DEFAULT_FORM,
+        title: prefillData.title,
+        author: prefillData.author,
+        coverUrl: prefillData.coverUrl,
+        genre: prefillData.genre,
+        notes: prefillData.notes,
+        publisher: prefillData.publisher,
+        publishedDate: prefillData.publishedDate,
+        pageCount: prefillData.pageCount,
+        buyLink: prefillData.buyLink,
+        previewLink: prefillData.previewLink,
+      });
     } else {
       setTab("isbn");
       setForm(DEFAULT_FORM);
     }
-  }, [editingBook, isOpen]);
+  }, [editingBook, prefillData, isOpen]);
 
   if (!isOpen) return null;
 
@@ -144,10 +160,13 @@ export function BookFormModal({ isOpen, onClose, editingBook }: BookFormModalPro
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm sm:p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-lg max-h-[92vh] sm:max-h-[90vh] flex flex-col">
+        {/* Drag handle — mobile only */}
+        <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-1 sm:hidden" />
+
         {/* Modal header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <h2 className="text-lg font-semibold text-slate-800">
@@ -163,27 +182,28 @@ export function BookFormModal({ isOpen, onClose, editingBook }: BookFormModalPro
 
         {/* Tabs — only shown when adding */}
         {!editingBook && (
-          <div className="flex border-b border-slate-200 px-6">
+          <div className="grid grid-cols-4 border-b border-slate-200 px-2 sm:px-0">
             {(
               [
-                { key: "isbn", label: "Buscar por ISBN", icon: Barcode },
-                { key: "search", label: "Buscar por nome", icon: TextSearch },
-                { key: "shelf", label: "Escanear estante", icon: Library },
-                { key: "manual", label: "Formulário", icon: PenLine },
+                { key: "isbn", label: "Buscar por ISBN", shortLabel: "ISBN", icon: Barcode },
+                { key: "search", label: "Buscar por nome", shortLabel: "Nome", icon: TextSearch },
+                { key: "shelf", label: "Escanear estante", shortLabel: "Estante", icon: Library },
+                { key: "manual", label: "Formulário", shortLabel: "Manual", icon: PenLine },
               ] as const
-            ).map(({ key, label, icon: Icon }) => (
+            ).map(({ key, label, shortLabel, icon: Icon }) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setTab(key)}
-                className={`flex items-center gap-1.5 py-3 px-1 mr-6 text-sm font-medium border-b-2 transition-colors ${
+                className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-3 sm:py-3 sm:px-4 text-[11px] sm:text-sm font-medium border-b-2 transition-colors ${
                   tab === key
                     ? "border-indigo-600 text-indigo-600"
                     : "border-transparent text-slate-500 hover:text-slate-700"
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                {label}
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="sm:hidden leading-tight text-center">{shortLabel}</span>
+                <span className="hidden sm:inline whitespace-nowrap">{label}</span>
               </button>
             ))}
           </div>
