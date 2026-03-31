@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { BooksProvider } from "@/context/BooksContext";
 import { getAllBooks } from "@/actions/books";
+import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -21,12 +22,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getSession().catch(() => null);
   const books = await getAllBooks().catch(() => []);
 
   return (
     <html lang="pt-BR" className={`${geistSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <BooksProvider initialBooks={books}>{children}</BooksProvider>
+        <BooksProvider key={session?.userId ?? "guest"} initialBooks={books}>
+          {children}
+        </BooksProvider>
       </body>
     </html>
   );

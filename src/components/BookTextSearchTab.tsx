@@ -154,14 +154,14 @@ export function BookTextSearchTab({ onUse }: BookTextSearchTabProps) {
       {/* Results */}
       {status === "found" && results.length > 0 && (
         <div className="flex flex-col gap-3">
-          {results.map((book) => {
+          {results.map((book, index) => {
             const coverUrl =
               book.imageLinks?.thumbnail ??
               book.imageLinks?.smallThumbnail ??
               "";
             return (
               <div
-                key={book.id}
+                key={`${book.id}-${index}`}
                 className="flex gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 hover:bg-indigo-50 transition-colors"
               >
                 {/* Cover */}

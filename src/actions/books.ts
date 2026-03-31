@@ -1,10 +1,11 @@
 "use server";
 
 import { randomUUID } from "crypto";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { db } from "@/db";
 import { books as booksTable } from "@/db/schema";
 import { Book, BookGenre } from "@/types/book";
+import { getSession } from "@/lib/session";
 
 export type CreateBookInput = Omit<Book, "id" | "createdAt">;
 export type UpdateBookInput = Partial<Omit<Book, "id" | "createdAt">>;
@@ -33,14 +34,20 @@ function rowToBook(row: BookRow): Book {
 }
 
 export async function getAllBooks(): Promise<Book[]> {
+  const session = await getSession();
+  if (!session) return [];
   const rows = await db
     .select()
     .from(booksTable)
+    .where(eq(booksTable.userId, session.userId))
     .orderBy(desc(booksTable.createdAt));
   return rows.map(rowToBook);
 }
 
 export async function createBook(input: CreateBookInput): Promise<Book> {
+  const session = await getSession();
+  if (!session) throw new Error("Não autenticado.");
+
   const id = randomUUID();
   const createdAt = new Date().toISOString().split("T")[0];
 
@@ -48,6 +55,7 @@ export async function createBook(input: CreateBookInput): Promise<Book> {
     .insert(booksTable)
     .values({
       id,
+      userId: session.userId,
       title: input.title,
       author: input.author,
       genre: input.genre,
@@ -73,6 +81,9 @@ export async function editBook(
   id: string,
   input: UpdateBookInput
 ): Promise<void> {
+  const session = await getSession();
+  if (!session) throw new Error("Não autenticado.");
+
   const updateValues: Partial<typeof booksTable.$inferInsert> = {};
 
   if (input.title !== undefined) updateValues.title = input.title;
@@ -92,9 +103,17 @@ export async function editBook(
 
   if (Object.keys(updateValues).length === 0) return;
 
-  await db.update(booksTable).set(updateValues).where(eq(booksTable.id, id));
+  await db
+    .update(booksTable)
+    .set(updateValues)
+    .where(and(eq(booksTable.id, id), eq(booksTable.userId, session.userId)));
 }
 
 export async function removeBook(id: string): Promise<void> {
-  await db.delete(booksTable).where(eq(booksTable.id, id));
+  const session = await getSession();
+  if (!session) throw new Error("Não autenticado.");
+
+  await db
+    .delete(booksTable)
+    .where(and(eq(booksTable.id, id), eq(booksTable.userId, session.userId)));
 }

@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   ExternalLink,
 } from "lucide-react";
+import { BottomNav } from "@/components/BottomNav";
 
 export default function BookDetailPage() {
   const params = useParams();
@@ -61,13 +62,13 @@ export default function BookDetailPage() {
       <div className="min-h-screen bg-slate-50">
         {/* Header */}
         <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
             <Link
               href="/"
               className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
-              Biblioteca
+              <span className="hidden sm:inline">Biblioteca</span>
             </Link>
 
             <div className="flex items-center gap-2">
@@ -76,20 +77,20 @@ export default function BookDetailPage() {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
               >
                 <Pencil className="w-4 h-4" />
-                Editar
+                <span className="hidden sm:inline">Editar</span>
               </button>
               <button
                 onClick={() => setConfirmDelete(true)}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
-                Remover
+                <span className="hidden sm:inline">Remover</span>
               </button>
             </div>
           </div>
         </header>
 
-        <main className="max-w-4xl mx-auto px-4 py-8">
+        <main className="max-w-4xl mx-auto px-4 py-6 pb-28 md:pb-8">
           <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
             <div className="flex flex-col sm:flex-row gap-0">
               {/* Cover */}
@@ -230,6 +231,8 @@ export default function BookDetailPage() {
           </div>
         </main>
       </div>
+
+      <BottomNav />
 
       {/* Edit modal */}
       <BookFormModal

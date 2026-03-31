@@ -6,7 +6,9 @@ import { BookCard } from "@/components/BookCard";
 import { BookStatus } from "@/types/book";
 import { STATUS_LABELS, GENRES } from "@/lib/constants";
 import Link from "next/link";
-import { Search, Plus, BookOpen, SlidersHorizontal, X, TrendingUp } from "lucide-react";
+import { Search, Plus, BookOpen, SlidersHorizontal, X, TrendingUp, LogOut } from "lucide-react";
+import { logout } from "@/actions/auth";
+import { BottomNav } from "@/components/BottomNav";
 
 interface FiltersState {
   search: string;
@@ -33,13 +35,10 @@ export function BookList({ onAddBook }: BookListProps) {
         filters.search === "" ||
         book.title.toLowerCase().includes(filters.search.toLowerCase()) ||
         book.author.toLowerCase().includes(filters.search.toLowerCase());
-
       const matchesStatus =
         filters.status === "all" || book.status === filters.status;
-
       const matchesGenre =
         filters.genre === "all" || book.genre === filters.genre;
-
       return matchesSearch && matchesStatus && matchesGenre;
     });
   }, [books, filters]);
@@ -56,7 +55,6 @@ export function BookList({ onAddBook }: BookListProps) {
 
   const hasActiveFilters =
     filters.status !== "all" || filters.genre !== "all" || filters.search !== "";
-
   const clearFilters = () =>
     setFilters({ search: "", status: "all", genre: "all" });
 
@@ -64,13 +62,14 @@ export function BookList({ onAddBook }: BookListProps) {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <BookOpen className="w-7 h-7 text-indigo-600" />
-            <h1 className="text-xl font-bold text-slate-800">Bookeeper</h1>
+            <BookOpen className="w-6 h-6 text-indigo-600" />
+            <h1 className="text-lg font-bold text-slate-800">Bookeeper</h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Desktop actions */}
+          <div className="hidden md:flex items-center gap-2">
             <Link
               href="/dashboard"
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
@@ -85,26 +84,43 @@ export function BookList({ onAddBook }: BookListProps) {
               <Plus className="w-4 h-4" />
               Adicionar livro
             </button>
+            <form action={logout}>
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors"
+                title="Sair"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </form>
           </div>
+
+          {/* Mobile: search toggle */}
+          <button
+            className="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
+            onClick={() => setShowFilters((v) => !v)}
+            aria-label="Filtros"
+          >
+            <SlidersHorizontal className="w-5 h-5" />
+            {hasActiveFilters && (
+              <span className="absolute top-3 right-3 w-2 h-2 bg-indigo-600 rounded-full" />
+            )}
+          </button>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
+      <main className="max-w-6xl mx-auto px-4 py-5 pb-28 md:pb-8">
+        {/* Stats — horizontal scroll on mobile, grid on desktop */}
+        <div className="flex md:grid md:grid-cols-4 gap-3 mb-6 overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible scrollbar-none">
           {[
             { label: "Total", value: stats.total, color: "text-slate-700" },
             { label: "Lidos", value: stats.read, color: "text-green-600" },
             { label: "Lendo", value: stats.reading, color: "text-blue-600" },
-            {
-              label: "Quero ler",
-              value: stats.want_to_read,
-              color: "text-slate-500",
-            },
+            { label: "Quero ler", value: stats.want_to_read, color: "text-slate-500" },
           ].map((stat) => (
             <div
               key={stat.label}
-              className="bg-white rounded-xl border border-slate-200 p-4 text-center"
+              className="bg-white rounded-xl border border-slate-200 p-4 text-center shrink-0 w-28 md:w-auto"
             >
               <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
               <p className="text-xs text-slate-500 mt-0.5">{stat.label}</p>
@@ -112,8 +128,8 @@ export function BookList({ onAddBook }: BookListProps) {
           ))}
         </div>
 
-        {/* Search + Filters bar */}
-        <div className="flex gap-3 mb-6">
+        {/* Search bar */}
+        <div className="flex gap-2 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -123,12 +139,12 @@ export function BookList({ onAddBook }: BookListProps) {
               onChange={(e) =>
                 setFilters((f) => ({ ...f, search: e.target.value }))
               }
-              className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400"
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400"
             />
           </div>
           <button
             onClick={() => setShowFilters((v) => !v)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
+            className={`hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
               showFilters || hasActiveFilters
                 ? "bg-indigo-50 border-indigo-300 text-indigo-700"
                 : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
@@ -145,56 +161,46 @@ export function BookList({ onAddBook }: BookListProps) {
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-500 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-500 hover:bg-slate-50 transition-colors"
             >
               <X className="w-4 h-4" />
-              Limpar
+              <span className="hidden sm:inline">Limpar</span>
             </button>
           )}
         </div>
 
-        {/* Filter options */}
+        {/* Status filter chips — horizontal scroll on mobile */}
         {showFilters && (
-          <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6 flex flex-wrap gap-6">
+          <div className="mb-5 space-y-4 bg-white rounded-2xl border border-slate-200 p-4">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                Status
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {(["all", "want_to_read", "reading", "read"] as const).map(
-                  (status) => (
-                    <button
-                      key={status}
-                      onClick={() => setFilters((f) => ({ ...f, status }))}
-                      className={`text-sm px-3 py-1 rounded-full border transition-colors ${
-                        filters.status === status
-                          ? "bg-indigo-600 text-white border-indigo-600"
-                          : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
-                      }`}
-                    >
-                      {status === "all" ? "Todos" : STATUS_LABELS[status]}
-                    </button>
-                  )
-                )}
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Status</p>
+              <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
+                {(["all", "want_to_read", "reading", "read"] as const).map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setFilters((f) => ({ ...f, status }))}
+                    className={`shrink-0 text-sm px-3 py-1.5 rounded-full border transition-colors ${
+                      filters.status === status
+                        ? "bg-indigo-600 text-white border-indigo-600"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    {status === "all" ? "Todos" : STATUS_LABELS[status]}
+                  </button>
+                ))}
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                Gênero
-              </p>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Gênero</p>
               <select
                 value={filters.genre}
-                onChange={(e) =>
-                  setFilters((f) => ({ ...f, genre: e.target.value }))
-                }
-                className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                onChange={(e) => setFilters((f) => ({ ...f, genre: e.target.value }))}
+                className="text-sm border border-slate-200 rounded-xl px-3 py-2 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full"
               >
                 <option value="all">Todos os gêneros</option>
                 {GENRES.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
+                  <option key={g} value={g}>{g}</option>
                 ))}
               </select>
             </div>
@@ -202,7 +208,7 @@ export function BookList({ onAddBook }: BookListProps) {
         )}
 
         {/* Results count */}
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-xs text-slate-400 mb-4">
           {filtered.length === books.length
             ? `${books.length} livros`
             : `${filtered.length} de ${books.length} livros`}
@@ -218,13 +224,15 @@ export function BookList({ onAddBook }: BookListProps) {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 items-start">
             {filtered.map((book) => (
               <BookCard key={book.id} book={book} />
             ))}
           </div>
         )}
       </main>
+
+      <BottomNav onAddBook={onAddBook} />
     </div>
   );
 }

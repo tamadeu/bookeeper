@@ -5,6 +5,7 @@ import { useBooks } from "@/context/BooksContext";
 import { Book } from "@/types/book";
 import { STATUS_LABELS } from "@/lib/constants";
 import { StarRating } from "@/components/StarRating";
+import { BottomNav } from "@/components/BottomNav";
 import {
   BarChart,
   Bar,
@@ -184,16 +185,16 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link
               href="/"
               className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
-              Biblioteca
+              <span className="hidden sm:inline">Biblioteca</span>
             </Link>
-            <span className="text-slate-300">/</span>
+            <span className="hidden sm:inline text-slate-300">/</span>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-indigo-600" />
               <h1 className="text-lg font-bold text-slate-800">Dashboard</h1>
@@ -202,7 +203,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-4 py-6 pb-28 md:pb-8 space-y-8">
         {/* Stat cards */}
         <section>
           <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-4">
@@ -477,6 +478,7 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+      <BottomNav />
     </div>
   );
 }
