@@ -4,6 +4,8 @@ import "./globals.css";
 import { BooksProvider } from "@/context/BooksContext";
 import { getAllBooks } from "@/actions/books";
 
+export const dynamic = "force-dynamic";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
