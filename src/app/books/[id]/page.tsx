@@ -16,15 +16,41 @@ import {
   Trash2,
   AlertTriangle,
   ExternalLink,
+  PlayCircle,
+  CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 
 export default function BookDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { getBook, deleteBook } = useBooks();
+  const { getBook, deleteBook, updateBook } = useBooks();
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [quickLoading, setQuickLoading] = useState<"start" | "finish" | null>(null);
+
+  const today = () => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const handleStartReading = async () => {
+    if (!book) return;
+    setQuickLoading("start");
+    await updateBook(book.id, { status: "reading", startedAt: today() });
+    setQuickLoading(null);
+  };
+
+  const handleFinishReading = async () => {
+    if (!book) return;
+    setQuickLoading("finish");
+    await updateBook(book.id, { status: "read", finishedAt: today() });
+    setQuickLoading(null);
+  };
 
   const book = getBook(params.id as string);
 
@@ -186,6 +212,40 @@ export default function BookDetailPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Quick actions */}
+                {book.status !== "read" && (
+                  <div className="flex gap-2 mb-6">
+                    {book.status === "want_to_read" && (
+                      <button
+                        onClick={handleStartReading}
+                        disabled={quickLoading !== null}
+                        className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95"
+                      >
+                        {quickLoading === "start" ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <PlayCircle className="w-4 h-4" />
+                        )}
+                        Iniciar leitura
+                      </button>
+                    )}
+                    {book.status === "reading" && (
+                      <button
+                        onClick={handleFinishReading}
+                        disabled={quickLoading !== null}
+                        className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95"
+                      >
+                        {quickLoading === "finish" ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <CheckCircle2 className="w-4 h-4" />
+                        )}
+                        Finalizar leitura
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 {/* Notes */}
                 {book.notes && (
