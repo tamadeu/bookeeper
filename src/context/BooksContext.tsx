@@ -15,6 +15,7 @@ import {
   type CreateBookInput,
   type UpdateBookInput,
 } from "@/actions/books";
+import { BookFormModal } from "@/components/BookFormModal";
 
 interface BooksContextValue {
   books: Book[];
@@ -22,6 +23,7 @@ interface BooksContextValue {
   updateBook: (id: string, input: UpdateBookInput) => Promise<void>;
   deleteBook: (id: string) => Promise<void>;
   getBook: (id: string) => Book | undefined;
+  openAddBookModal: () => void;
 }
 
 const BooksContext = createContext<BooksContextValue | null>(null);
@@ -33,6 +35,9 @@ interface BooksProviderProps {
 
 export function BooksProvider({ children, initialBooks }: BooksProviderProps) {
   const [books, setBooks] = useState<Book[]>(initialBooks);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const openAddBookModal = useCallback(() => setModalOpen(true), []);
 
   const addBook = useCallback(async (input: CreateBookInput) => {
     const newBook = await createBook(input);
@@ -57,8 +62,9 @@ export function BooksProvider({ children, initialBooks }: BooksProviderProps) {
   );
 
   return (
-    <BooksContext.Provider value={{ books, addBook, updateBook, deleteBook, getBook }}>
+    <BooksContext.Provider value={{ books, addBook, updateBook, deleteBook, getBook, openAddBookModal }}>
       {children}
+      <BookFormModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
     </BooksContext.Provider>
   );
 }

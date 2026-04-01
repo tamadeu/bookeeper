@@ -42,14 +42,16 @@ function ExploreBookCard({
   return (
     <div className="flex-none w-[108px] group">
       <div className="relative w-[108px] h-[160px] rounded-xl overflow-hidden shadow-md mb-2">
-        <Image
-          src={book.coverUrl}
-          alt={book.title}
-          fill
-          sizes="108px"
-          className="object-cover"
-          unoptimized
-        />
+        <Link href={`/explore/${book.id}`} className="block w-full h-full" aria-label={book.title}>
+          <Image
+            src={book.coverUrl}
+            alt={book.title}
+            fill
+            sizes="108px"
+            className="object-cover"
+            unoptimized
+          />
+        </Link>
         <button
           onClick={() => onAdd(book)}
           className="absolute bottom-2 right-2 bg-indigo-600 text-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity active:scale-95"
@@ -58,10 +60,12 @@ function ExploreBookCard({
           <Plus className="w-3.5 h-3.5" />
         </button>
       </div>
-      <p className="text-xs font-semibold text-slate-800 leading-snug line-clamp-2">
-        {book.title}
-      </p>
-      <p className="text-[11px] text-slate-400 mt-0.5 truncate">{book.author}</p>
+      <Link href={`/explore/${book.id}`} className="block">
+        <p className="text-xs font-semibold text-slate-800 leading-snug line-clamp-2 hover:text-indigo-600 transition-colors">
+          {book.title}
+        </p>
+        <p className="text-[11px] text-slate-400 mt-0.5 truncate">{book.author}</p>
+      </Link>
     </div>
   );
 }

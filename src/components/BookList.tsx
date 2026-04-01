@@ -16,12 +16,8 @@ interface FiltersState {
   genre: string;
 }
 
-interface BookListProps {
-  onAddBook: () => void;
-}
-
-export function BookList({ onAddBook }: BookListProps) {
-  const { books } = useBooks();
+export function BookList() {
+  const { books, openAddBookModal } = useBooks();
   const [filters, setFilters] = useState<FiltersState>({
     search: "",
     status: "all",
@@ -78,7 +74,7 @@ export function BookList({ onAddBook }: BookListProps) {
               Dashboard
             </Link>
             <button
-              onClick={onAddBook}
+              onClick={openAddBookModal}
               className="flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -232,7 +228,7 @@ export function BookList({ onAddBook }: BookListProps) {
         )}
       </main>
 
-      <BottomNav onAddBook={onAddBook} />
+      <BottomNav />
     </div>
   );
 }
